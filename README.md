@@ -43,4 +43,4 @@ password:- 123
 
 as static has 100+ files so we cant keep it because of that we are keeping zip file of it so please extract it 
 
-screenshots
+video link :- https://drive.google.com/drive/folders/14AN02bz8eGMdHGfdvP_H4olS3wwimu-d
