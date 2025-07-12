@@ -1,7 +1,7 @@
 # Odoo-Hackathon
-NULL TERMINATORS( PRIYAL GANDHI -TL  priyalg234@gmail.com
-                  STUTI SHAH
-                  VAISHAL SHAH
+NULL TERMINATORS( PRIYAL GANDHI -TL  priyalg234@gmail.com ,
+                  STUTI SHAH, 
+                  VAISHAL SHAH,
                   DARSHIT MONAPARA )
 
 PROBLEM STATEMENT 1 :
