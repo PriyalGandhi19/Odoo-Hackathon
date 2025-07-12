@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Send Swap Request - SkillSwap{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-handshake me-2"></i>Send Swap Request</h3>
+                    <p class="mb-0">Request a skill swap with {{ receiver.get_full_name|default:receiver.username }}</p>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    {% if receiver.userprofile.profile_photo %}
+                                        <img src="{{ receiver.userprofile.profile_photo.url }}" alt="{{ receiver.username }}" class="profile-img mb-3">
+                                    {% else %}
+                                        <div class="profile-img mb-3 d-flex align-items-center justify-content-center mx-auto" style="background: var(--primary-gradient);">
+                                            <i class="fas fa-user fa-2x text-white"></i>
+                                        </div>
+                                    {% endif %}
+                                    <h5>{{ receiver.get_full_name|default:receiver.username }}</h5>
+                                    {% if receiver.userprofile.location %}
+                                        <p class="text-muted"><i class="fas fa-map-marker-alt me-1"></i>{{ receiver.userprofile.location }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Skills they want to learn:</h6>
+                            {% for skill in receiver.userskill_set.all %}
+                                {% if skill.skill_type == 'wanted' %}
+                                    <span class="skill-badge mb-2">{{ skill.skill.name }}</span>
+                                {% endif %}
+                            {% empty %}
+                                <p class="text-muted">No skills listed</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Skill You're Offering</label>
+                                {{ form.skill_offered }}
+                                {% if form.skill_offered.errors %}
+                                    <div class="text-danger">{{ form.skill_offered.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Skill You Want</label>
+                                {{ form.skill_wanted }}
+                                {% if form.skill_wanted.errors %}
+                                    <div class="text-danger">{{ form.skill_wanted.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Message</label>
+                            {{ form.message }}
+                            {% if form.message.errors %}
+                                <div class="text-danger">{{ form.message.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Preferred Date & Time (Optional)</label>
+                            {{ form.scheduled_date }}
+                            {% if form.scheduled_date.errors %}
+                                <div class="text-danger">{{ form.scheduled_date.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-2"></i>Send Request
+                            </button>
+                            <a href="{% url 'user_profile' receiver.username %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Profile
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

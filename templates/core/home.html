@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="container">
+        <div class="hero-content">
+            <h1 class="hero-title floating-element">Welcome to SkillSwap</h1>
+            <p class="hero-subtitle">Exchange skills, build community, and grow together in our vibrant learning ecosystem</p>
+            {% if not user.is_authenticated %}
+                <div class="mt-4">
+                    <a href="{% url 'register' %}" class="btn btn-primary btn-lg me-3">
+                        <i class="fas fa-rocket me-2"></i>Get Started
+                    </a>
+                    <a href="{% url 'browse_users' %}" class="btn btn-secondary btn-lg">
+                        <i class="fas fa-search me-2"></i>Explore Skills
+                    </a>
+                </div>
+            {% else %}
+                <div class="mt-4">
+                    <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg me-3">
+                        <i class="fas fa-tachometer-alt me-2"></i>Go to Dashboard
+                    </a>
+                    <a href="{% url 'browse_users' %}" class="btn btn-secondary btn-lg">
+                        <i class="fas fa-users me-2"></i>Find Skills
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="stats-section">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="stat-card pulse-animation">
+                    <span class="stat-number">{{ total_users }}</span>
+                    <span class="stat-label">Active Users</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card pulse-animation" style="animation-delay: 0.2s;">
+                    <span class="stat-number">{{ total_skills }}</span>
+                    <span class="stat-label">Skills Available</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card pulse-animation" style="animation-delay: 0.4s;">
+                    <span class="stat-number">{{ total_swaps }}</span>
+                    <span class="stat-label">Successful Swaps</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if admin_messages %}
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-bullhorn me-2"></i>Platform Updates</h4>
+                </div>
+                <div class="card-body">
+                    {% for message in admin_messages %}
+                        <div class="alert alert-info">
+                            <h6>{{ message.title }}</h6>
+                            <p class="mb-0">{{ message.content }}</p>
+                            <small class="text-muted">{{ message.created_at|date:"M d, Y" }}</small>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="text-center gradient-text mb-4">How SkillSwap Works</h2>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <i class="fas fa-user-plus fa-3x" style="color: #667eea;"></i>
+                    </div>
+                    <h5>Create Your Profile</h5>
+                    <p>Set up your profile with skills you offer and skills you want to learn.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <i class="fas fa-search fa-3x" style="color: #f5576c;"></i>
+                    </div>
+                    <h5>Find Matches</h5>
+                    <p>Browse users and find perfect skill matches based on your interests.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <i class="fas fa-handshake fa-3x" style="color: #00f2fe;"></i>
+                    </div>
+                    <h5>Start Swapping</h5>
+                    <p>Send requests, schedule sessions, and start your learning journey!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if recent_users %}
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="text-center gradient-text mb-4">Recent Members</h2>
+        </div>
+        {% for profile in recent_users %}
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    {% if profile.profile_photo %}
+                        <img src="{{ profile.profile_photo.url }}" alt="{{ profile.user.username }}" class="profile-img mb-3">
+                    {% else %}
+                        <div class="profile-img mb-3 d-flex align-items-center justify-content-center" style="background: var(--primary-gradient);">
+                            <i class="fas fa-user fa-2x text-white"></i>
+                        </div>
+                    {% endif %}
+                    <h5>{{ profile.user.get_full_name|default:profile.user.username }}</h5>
+                    {% if profile.location %}
+                        <p class="text-muted"><i class="fas fa-map-marker-alt me-1"></i>{{ profile.location }}</p>
+                    {% endif %}
+                    <div class="mb-3">
+                        {% for skill in profile.user.userskill_set.all|slice:":3" %}
+                            <span class="skill-badge">{{ skill.skill.name }}</span>
+                        {% endfor %}
+                    </div>
+                    <a href="{% url 'user_profile' profile.user.username %}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-eye me-1"></i>View Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card" style="background: var(--primary-gradient); color: white;">
+                <div class="card-body text-center py-5">
+                    <h2 class="mb-4">Ready to Start Your Skill Journey?</h2>
+                    <p class="lead mb-4">Join thousands of learners and teachers in our community</p>
+                    {% if not user.is_authenticated %}
+                        <a href="{% url 'register' %}" class="btn btn-light btn-lg">
+                            <i class="fas fa-rocket me-2"></i>Join SkillSwap Today
+                        </a>
+                    {% else %}
+                        <a href="{% url 'browse_users' %}" class="btn btn-light btn-lg">
+                            <i class="fas fa-search me-2"></i>Find Your Next Skill
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

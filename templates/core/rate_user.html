@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Rate User - SkillSwap{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-star me-2"></i>Rate Your Experience</h3>
+                    <p class="mb-0">How was your skill swap with {{ rated_user.get_full_name|default:rated_user.username }}?</p>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        {% if rated_user.userprofile.profile_photo %}
+                            <img src="{{ rated_user.userprofile.profile_photo.url }}" alt="{{ rated_user.username }}" class="profile-img mb-3">
+                        {% else %}
+                            <div class="profile-img mb-3 d-flex align-items-center justify-content-center mx-auto" style="background: var(--primary-gradient);">
+                                <i class="fas fa-user fa-2x text-white"></i>
+                            </div>
+                        {% endif %}
+                        <h5>{{ rated_user.get_full_name|default:rated_user.username }}</h5>
+                        <p class="text-muted">
+                            Skill Swap: {{ swap_request.skill_offered.name }} ↔ {{ swap_request.skill_wanted.name }}
+                        </p>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">Rating</label>
+                            {{ form.rating }}
+                            {% if form.rating.errors %}
+                                <div class="text-danger">{{ form.rating.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Feedback (Optional)</label>
+                            {{ form.feedback }}
+                            {% if form.feedback.errors %}
+                                <div class="text-danger">{{ form.feedback.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-star me-2"></i>Submit Rating
+                            </button>
+                            <a href="{% url 'swap_requests' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Requests
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

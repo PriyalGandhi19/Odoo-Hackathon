@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Messages - SkillSwap{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-envelope me-2"></i>Messages</h3>
+                </div>
+                <div class="card-body">
+                    {% if conversation_users %}
+                        <div class="row">
+                            {% for user in conversation_users %}
+                                <div class="col-md-4 mb-3">
+                                    <div class="card">
+                                        <div class="card-body text-center">
+                                            {% if user.userprofile.profile_photo %}
+                                                <img src="{{ user.userprofile.profile_photo.url }}" alt="{{ user.username }}" class="profile-img mb-3">
+                                            {% else %}
+                                                <div class="profile-img mb-3 d-flex align-items-center justify-content-center mx-auto" style="background: var(--primary-gradient);">
+                                                    <i class="fas fa-user fa-2x text-white"></i>
+                                                </div>
+                                            {% endif %}
+                                            <h6>{{ user.get_full_name|default:user.username }}</h6>
+                                            <a href="{% url 'chat_with_user' user.username %}" class="btn btn-primary btn-sm">
+                                                <i class="fas fa-comments me-1"></i>Open Chat
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-envelope fa-3x text-muted mb-3"></i>
+                            <h4>No conversations yet</h4>
+                            <p class="text-muted">Start a conversation by visiting someone's profile and sending them a message</p>
+                            <a href="{% url 'browse_users' %}" class="btn btn-primary">
+                                <i class="fas fa-users me-1"></i>Browse Users
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

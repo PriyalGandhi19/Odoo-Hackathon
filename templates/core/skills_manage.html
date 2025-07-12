@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Skills - SkillSwap{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-cogs me-2"></i>Manage Your Skills</h3>
+                    <p class="mb-0">Add skills you can teach or want to learn</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Skills Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header" style="background: var(--accent-gradient); color: white;">
+                    <h4><i class="fas fa-plus me-2"></i>Add Skills</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Quick Add from Existing Skills -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5>Add from Available Skills</h5>
+                            <div class="row">
+                                {% for skill in all_skills %}
+                                    <div class="col-md-4 mb-2">
+                                        <div class="card">
+                                            <div class="card-body py-2">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <div>
+                                                        <strong>{{ skill.name }}</strong>
+                                                        <br><small class="text-muted">{{ skill.category }}</small>
+                                                    </div>
+                                                    <div class="btn-group">
+                                                        <button type="button" class="btn btn-success btn-sm" onclick="addSkillToUser({{ skill.id }}, 'offered', '{{ skill.name }}')">
+                                                            <i class="fas fa-gift"></i> Offer
+                                                        </button>
+                                                        <button type="button" class="btn btn-warning btn-sm" onclick="addSkillToUser({{ skill.id }}, 'wanted', '{{ skill.name }}')">
+                                                            <i class="fas fa-search"></i> Want
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% empty %}
+                                    <div class="col-12">
+                                        <p class="text-muted">No skills available. Create a new skill below.</p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Create New Skill -->
+                    <div class="row">
+                        <div class="col-12">
+                            <h5>Create New Skill</h5>
+                            <form method="post">
+                                {% csrf_token %}
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Skill Name</label>
+                                        {{ skill_form.name }}
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Category</label>
+                                        {{ skill_form.category }}
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">&nbsp;</label>
+                                        <button type="submit" name="add_new_skill" class="btn btn-primary w-100">
+                                            <i class="fas fa-plus me-1"></i>Create Skill
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Description</label>
+                                    {{ skill_form.description }}
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Current Skills -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header" style="background: var(--accent-gradient); color: white;">
+                    <h4><i class="fas fa-gift me-2"></i>Skills You Offer ({{ offered_skills.count }})</h4>
+                </div>
+                <div class="card-body">
+                    {% if offered_skills %}
+                        {% for skill in offered_skills %}
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6>{{ skill.skill.name }}</h6>
+                                            <span class="badge bg-info mb-2">{{ skill.get_level_display }}</span>
+                                            <br><small class="text-muted">{{ skill.skill.category }}</small>
+                                            {% if skill.description %}
+                                                <p class="text-muted mb-0 mt-2">{{ skill.description }}</p>
+                                            {% endif %}
+                                            <small class="text-muted">Added {{ skill.created_at|timesince }} ago</small>
+                                        </div>
+                                        <a href="{% url 'skill_delete' skill.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to remove this skill?')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-gift fa-3x text-muted mb-3"></i>
+                            <h5>No skills offered yet</h5>
+                            <p class="text-muted">Add skills you can teach to others</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header" style="background: var(--secondary-gradient); color: white;">
+                    <h4><i class="fas fa-search me-2"></i>Skills You Want ({{ wanted_skills.count }})</h4>
+                </div>
+                <div class="card-body">
+                    {% if wanted_skills %}
+                        {% for skill in wanted_skills %}
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6>{{ skill.skill.name }}</h6>
+                                            <span class="badge bg-warning mb-2">{{ skill.get_level_display }}</span>
+                                            <br><small class="text-muted">{{ skill.skill.category }}</small>
+                                            {% if skill.description %}
+                                                <p class="text-muted mb-0 mt-2">{{ skill.description }}</p>
+                                            {% endif %}
+                                            <small class="text-muted">Added {{ skill.created_at|timesince }} ago</small>
+                                        </div>
+                                        <a href="{% url 'skill_delete' skill.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to remove this skill?')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </div>
+            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                            <h5>No skills wanted yet</h5>
+                            <p class="text-muted">Add skills you want to learn</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden form for adding skills -->
+<form id="addSkillForm" method="post" action="{% url 'add_skill_to_user' %}" style="display: none;">
+    {% csrf_token %}
+    <input type="hidden" name="skill_id" id="skillId">
+    <input type="hidden" name="skill_type" id="skillType">
+    <input type="hidden" name="level" id="skillLevel" value="beginner">
+    <input type="hidden" name="description" id="skillDescription" value="">
+</form>
+
+<!-- Modal for skill level selection -->
+<div class="modal fade" id="skillLevelModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Select Your Level</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>What's your level in <strong id="modalSkillName"></strong>?</p>
+                <div class="mb-3">
+                    <label class="form-label">Level</label>
+                    <select class="form-control" id="modalSkillLevel">
+                        <option value="beginner">Beginner</option>
+                        <option value="intermediate">Intermediate</option>
+                        <option value="expert">Expert</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Description (Optional)</label>
+                    <textarea class="form-control" id="modalSkillDescription" rows="3" placeholder="Tell others about your experience with this skill..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitSkill()">Add Skill</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentSkillId, currentSkillType, currentSkillName;
+
+function addSkillToUser(skillId, skillType, skillName) {
+    currentSkillId = skillId;
+    currentSkillType = skillType;
+    currentSkillName = skillName;
+    
+    document.getElementById('modalSkillName').textContent = skillName;
+    document.getElementById('modalSkillLevel').value = 'beginner';
+    document.getElementById('modalSkillDescription').value = '';
+    
+    var modal = new bootstrap.Modal(document.getElementById('skillLevelModal'));
+    modal.show();
+}
+
+function submitSkill() {
+    document.getElementById('skillId').value = currentSkillId;
+    document.getElementById('skillType').value = currentSkillType;
+    document.getElementById('skillLevel').value = document.getElementById('modalSkillLevel').value;
+    document.getElementById('skillDescription').value = document.getElementById('modalSkillDescription').value;
+    
+    document.getElementById('addSkillForm').submit();
+}
+</script>
+{% endblock %}

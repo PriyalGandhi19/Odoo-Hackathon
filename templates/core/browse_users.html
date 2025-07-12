@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block title %}Browse Users - SkillSwap{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-users me-2"></i>Browse Users</h3>
+                </div>
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-4">
+                            {{ form.query }}
+                        </div>
+                        <div class="col-md-3">
+                            {{ form.category }}
+                        </div>
+                        <div class="col-md-3">
+                            {{ form.level }}
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-search me-1"></i>Search
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        {% for profile in page_obj %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        {% if profile.profile_photo %}
+                            <img src="{{ profile.profile_photo.url }}" alt="{{ profile.user.username }}" class="profile-img mb-3">
+                        {% else %}
+                            <div class="profile-img mb-3 d-flex align-items-center justify-content-center mx-auto" style="background: var(--primary-gradient);">
+                                <i class="fas fa-user fa-2x text-white"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <h5>{{ profile.user.get_full_name|default:profile.user.username }}</h5>
+                        
+                        {% if profile.location %}
+                            <p class="text-muted mb-2">
+                                <i class="fas fa-map-marker-alt me-1"></i>{{ profile.location }}
+                            </p>
+                        {% endif %}
+                        
+                        <div class="mb-3">
+                            <small class="text-muted">Points: {{ profile.points }}</small>
+                            {% if profile.is_verified %}
+                                <i class="fas fa-check-circle text-success ms-1" title="Verified"></i>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h6>Skills Offered:</h6>
+                            {% for skill in profile.user.userskill_set.all %}
+                                {% if skill.skill_type == 'offered' %}
+                                    <span class="skill-badge">{{ skill.skill.name }}</span>
+                                {% endif %}
+                            {% empty %}
+                                <small class="text-muted">No skills offered</small>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h6>Skills Wanted:</h6>
+                            {% for skill in profile.user.userskill_set.all %}
+                                {% if skill.skill_type == 'wanted' %}
+                                    <span class="skill-badge" style="background: var(--secondary-gradient);">{{ skill.skill.name }}</span>
+                                {% endif %}
+                            {% empty %}
+                                <small class="text-muted">No skills wanted</small>
+                            {% endfor %}
+                        </div>
+                        
+                        <a href="{% url 'user_profile' profile.user.username %}" class="btn btn-primary">
+                            <i class="fas fa-eye me-1"></i>View Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                    <h4>No users found</h4>
+                    <p class="text-muted">Try adjusting your search criteria</p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% if page_obj.has_other_pages %}
+        <div class="row">
+            <div class="col-12">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.level %}&level={{ request.GET.level }}{% endif %}">Previous</a>
+                            </li>
+                        {% endif %}
+                        
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.level %}&level={{ request.GET.level }}{% endif %}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.query %}&query={{ request.GET.query }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.level %}&level={{ request.GET.level }}{% endif %}">Next</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

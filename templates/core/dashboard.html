@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - SkillSwap{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card" style="background: var(--primary-gradient); color: white;">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h2><i class="fas fa-tachometer-alt me-2"></i>Welcome back, {{ user.get_full_name|default:user.username }}!</h2>
+                            <p class="mb-0">You have {{ profile.points }} points and {{ pending_requests.count }} pending requests</p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            {% if profile.profile_photo %}
+                                <img src="{{ profile.profile_photo.url }}" alt="Profile" class="profile-img" style="width: 100px; height: 100px;">
+                            {% else %}
+                                <div class="profile-img d-inline-flex align-items-center justify-content-center" style="width: 100px; height: 100px; background: rgba(255,255,255,0.2);">
+                                    <i class="fas fa-user fa-3x"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="sidebar">
+                <h5><i class="fas fa-cogs me-2"></i>Quick Actions</h5>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'profile_edit' %}" class="btn btn-primary">
+                        <i class="fas fa-edit me-2"></i>Edit Profile
+                    </a>
+                    <a href="{% url 'skills_manage' %}" class="btn btn-secondary">
+                        <i class="fas fa-plus me-2"></i>Manage Skills
+                    </a>
+                    <a href="{% url 'browse_users' %}" class="btn btn-primary">
+                        <i class="fas fa-search me-2"></i>Find Users
+                    </a>
+                    <a href="{% url 'messages' %}" class="btn btn-secondary">
+                        <i class="fas fa-envelope me-2"></i>Messages
+                        {% if recent_messages.count > 0 %}
+                            <span class="badge bg-danger">{{ recent_messages.count }}</span>
+                        {% endif %}
+                    </a>
+                </div>
+
+                <hr class="my-4">
+
+                <h6><i class="fas fa-chart-line me-2"></i>Your Stats</h6>
+                <div class="mb-2">
+                    <small class="text-muted">Points Earned</small>
+                    <div class="progress">
+                        <div class="progress-bar" style="width: {{ profile.points|floatformat:0 }}%; background: var(--primary-gradient);"></div>
+                    </div>
+                    <small>{{ profile.points }} points</small>
+                </div>
+                
+                <div class="mb-2">
+                    <small class="text-muted">Skills Offered</small>
+                    <div><strong>{{ offered_skills.count }}</strong></div>
+                </div>
+                
+                <div class="mb-2">
+                    <small class="text-muted">Skills Wanted</small>
+                    <div><strong>{{ wanted_skills.count }}</strong></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="content-area">
+                <div class="row">
+                    <div class="col-12 mb-4">
+                        <h4><i class="fas fa-handshake me-2"></i>Pending Requests</h4>
+                        {% if pending_requests %}
+                            {% for request in pending_requests %}
+                                <div class="card mb-2">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-md-8">
+                                                <h6>{{ request.requester.get_full_name|default:request.requester.username }}</h6>
+                                                <p class="mb-1">Wants to swap <span class="skill-badge">{{ request.skill_offered.name }}</span> for <span class="skill-badge">{{ request.skill_wanted.name }}</span></p>
+                                                <small class="text-muted">{{ request.created_at|timesince }} ago</small>
+                                            </div>
+                                            <div class="col-md-4 text-end">
+                                                <a href="{% url 'handle_swap_request' request.id 'accept' %}" class="btn btn-success btn-sm">Accept</a>
+                                                <a href="{% url 'handle_swap_request' request.id 'reject' %}" class="btn btn-danger btn-sm">Reject</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted">No pending requests</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-12 mb-4">
+                        <h4><i class="fas fa-lightbulb me-2"></i>Suggested Matches</h4>
+                        {% if suggested_matches %}
+                            <div class="row">
+                                {% for match in suggested_matches %}
+                                    <div class="col-md-6 mb-3">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <h6>{{ match.user.get_full_name|default:match.user.username }}</h6>
+                                                <p class="mb-2">Offers <span class="skill-badge">{{ match.skill.name }}</span></p>
+                                                <a href="{% url 'user_profile' match.user.username %}" class="btn btn-primary btn-sm">View Profile</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-muted">No matches found. Add more wanted skills to see suggestions!</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <h5><i class="fas fa-gift me-2"></i>Skills You Offer</h5>
+                        {% if offered_skills %}
+                            {% for skill in offered_skills %}
+                                <div class="card mb-2">
+                                    <div class="card-body py-2">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong>{{ skill.skill.name }}</strong>
+                                                <span class="badge bg-info">{{ skill.level }}</span>
+                                            </div>
+                                            <a href="{% url 'skill_delete' skill.id %}" class="btn btn-danger btn-sm">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted">No skills offered yet</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <h5><i class="fas fa-search me-2"></i>Skills You Want</h5>
+                        {% if wanted_skills %}
+                            {% for skill in wanted_skills %}
+                                <div class="card mb-2">
+                                    <div class="card-body py-2">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong>{{ skill.skill.name }}</strong>
+                                                <span class="badge bg-warning">{{ skill.level }}</span>
+                                            </div>
+                                            <a href="{% url 'skill_delete' skill.id %}" class="btn btn-danger btn-sm">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted">No skills wanted yet</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ profile_user.get_full_name|default:profile_user.username }} - SkillSwap{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    {% if profile.profile_photo %}
+                        <img src="{{ profile.profile_photo.url }}" alt="{{ profile_user.username }}" class="profile-img mb-3" style="width: 120px; height: 120px;">
+                    {% else %}
+                        <div class="profile-img mb-3 d-flex align-items-center justify-content-center mx-auto" style="width: 120px; height: 120px; background: var(--primary-gradient);">
+                            <i class="fas fa-user fa-3x text-white"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <h3>{{ profile_user.get_full_name|default:profile_user.username }}</h3>
+                    <p class="text-muted">@{{ profile_user.username }}</p>
+                    
+                    {% if profile.location %}
+                        <p class="text-muted">
+                            <i class="fas fa-map-marker-alt me-1"></i>{{ profile.location }}
+                        </p>
+                    {% endif %}
+                    
+                    <div class="mb-3">
+                        <span class="badge bg-primary">{{ profile.points }} Points</span>
+                        {% if profile.is_verified %}
+                            <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i>Verified</span>
+                        {% endif %}
+                    </div>
+                    
+                    {% if avg_rating %}
+                        <div class="mb-3">
+                            <div class="rating-stars">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= avg_rating %}
+                                        <i class="fas fa-star"></i>
+                                    {% else %}
+                                        <i class="far fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <small class="text-muted">({{ ratings.count }} reviews)</small>
+                        </div>
+                    {% endif %}
+                    
+                    {% if user.is_authenticated and user != profile_user %}
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'send_swap_request' profile_user.username %}" class="btn btn-primary">
+                                <i class="fas fa-handshake me-2"></i>Request Swap
+                            </a>
+                            <a href="{% url 'chat_with_user' profile_user.username %}" class="btn btn-secondary">
+                                <i class="fas fa-envelope me-2"></i>Send Message
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            {% if profile.bio %}
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5><i class="fas fa-info-circle me-2"></i>About</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>{{ profile.bio }}</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-md-8">
+            <div class="row">
+                <div class="col-12 mb-4">
+                    <div class="card">
+                        <div class="card-header" style="background: var(--accent-gradient); color: white;">
+                            <h4><i class="fas fa-gift me-2"></i>Skills Offered</h4>
+                        </div>
+                        <div class="card-body">
+                            {% if offered_skills %}
+                                <div class="row">
+                                    {% for skill in offered_skills %}
+                                        <div class="col-md-6 mb-3">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <h6>{{ skill.skill.name }}</h6>
+                                                    <span class="badge bg-info">{{ skill.get_level_display }}</span>
+                                                    {% if skill.description %}
+                                                        <p class="text-muted mt-2 mb-0">{{ skill.description }}</p>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="text-center py-4">
+                                    <i class="fas fa-gift fa-3x text-muted mb-3"></i>
+                                    <h5>No skills offered</h5>
+                                    <p class="text-muted">This user hasn't added any skills they can teach yet.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-12 mb-4">
+                    <div class="card">
+                        <div class="card-header" style="background: var(--secondary-gradient); color: white;">
+                            <h4><i class="fas fa-search me-2"></i>Skills Wanted</h4>
+                        </div>
+                        <div class="card-body">
+                            {% if wanted_skills %}
+                                <div class="row">
+                                    {% for skill in wanted_skills %}
+                                        <div class="col-md-6 mb-3">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <h6>{{ skill.skill.name }}</h6>
+                                                    <span class="badge bg-warning">{{ skill.get_level_display }}</span>
+                                                    {% if skill.description %}
+                                                        <p class="text-muted mt-2 mb-0">{{ skill.description }}</p>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="text-center py-4">
+                                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                                    <h5>No skills wanted</h5>
+                                    <p class="text-muted">This user hasn't added any skills they want to learn yet.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                {% if ratings %}
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4><i class="fas fa-star me-2"></i>Reviews & Ratings</h4>
+                            </div>
+                            <div class="card-body">
+                                {% for rating in ratings %}
+                                    <div class="card mb-3">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <h6>{{ rating.rater.get_full_name|default:rating.rater.username }}</h6>
+                                                    <div class="rating-stars mb-2">
+                                                        {% for i in "12345" %}
+                                                            {% if forloop.counter <= rating.rating %}
+                                                                <i class="fas fa-star"></i>
+                                                            {% else %}
+                                                                <i class="far fa-star"></i>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    </div>
+                                                    {% if rating.feedback %}
+                                                        <p class="mb-0">{{ rating.feedback }}</p>
+                                                    {% endif %}
+                                                </div>
+                                                <small class="text-muted">{{ rating.created_at|timesince }} ago</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
