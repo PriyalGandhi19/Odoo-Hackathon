@@ -1,4 +1,4 @@
-# Odoo-Hackathon
+# Odoo-Hackathon (Team 2318)
 NULL TERMINATORS( PRIYAL GANDHI -TL  priyalg234@gmail.com ,
                   STUTI SHAH, 
                   VAISHAL SHAH,
