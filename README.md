@@ -29,3 +29,18 @@ Admin Role
 ● Send platform-wide messages (e.g., feature updates, downtime alerts).
 ● Download reports of user activity, feedback logs, and swap stats.
 Mockup -https://link.excalidraw.com/l/65VNwvy7c4X/8bM86GXnnUN
+
+
+to run our project run following commands:- 
+pip install django mysqlclient pillow
+python manage.py makemigrations
+python manage.py migrate
+python manage.py populate_data
+python manage.py runserver
+
+user :-  vaish
+password:- 123
+
+as static has 100+ files so we cant keep it because of that we are keeping zip file of it so please extract it 
+
+screenshots
